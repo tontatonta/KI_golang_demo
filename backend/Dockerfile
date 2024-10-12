@@ -1,21 +1,28 @@
-# 使用するGoのイメージを指定
-FROM golang:1.23.2
+# ベースイメージを指定
+FROM golang:1.23.2 AS builder
 
-# アプリケーションの作業ディレクトリを作成
+# ワーキングディレクトリを設定
 WORKDIR /app
 
-# モジュールの設定ファイルをコピー
-COPY go.mod ./
-COPY go.sum ./
-
-# 依存関係のインストール
+# モジュールファイルをコピーして依存関係をダウンロード
+COPY go.mod go.sum ./
 RUN go mod download
 
 # ソースコードをコピー
 COPY . .
 
-# アプリをビルド
-RUN go build -o server .
+# Goのビルドを実行
+RUN go build -o server ./main.go
 
-# ポート8080でアプリを提供
-CMD ["/app/server"]
+# 実行時に実行するコマンドを指定
+FROM alpine:latest
+
+# ビルドしたバイナリを新しいイメージにコピー
+WORKDIR /root/
+COPY --from=builder /app/server .
+
+# 実行コマンドを指定
+CMD ["./server"]
+
+# コンテナがリッスンするポートを指定
+EXPOSE 8000
