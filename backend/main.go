@@ -3,7 +3,7 @@ package main
 import (
     "fmt"
     "net/http"
-    "github.com/tontatonta/KI_golang_demo/backend/src/film" // filmパッケージをインポート
+    "github.com/tontatonta/KI_golang_demo/backend/films/film" // filmパッケージをインポート
 )
 
 // ハンドラー関数でfilmパッケージを使用
