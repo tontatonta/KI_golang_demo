@@ -1,18 +1,21 @@
-# 使用するGoのバージョンを指定
+# 使用するGoのイメージを指定
 FROM golang:1.23.2
 
-# 作業ディレクトリを設定
+# アプリケーションの作業ディレクトリを作成
 WORKDIR /app
 
-# Goのモジュールをコピー
+# モジュールの設定ファイルをコピー
 COPY go.mod ./
+COPY go.sum ./
+
+# 依存関係のインストール
 RUN go mod download
 
-# アプリのソースコードをコピー
+# ソースコードをコピー
 COPY . .
 
 # アプリをビルド
-RUN go build -o main .
+RUN go build -o server .
 
-# アプリを実行
-CMD ["./main"]
+# ポート8080でアプリを提供
+CMD ["/app/server"]
