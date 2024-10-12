@@ -1,18 +1,32 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"github.com/tontatonta/KI_golang_demo/contents/film" // filmパッケージをインポート
 )
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, World!")
 }
 
+func filmsHandler(w http.ResponseWriter, r *http.Request) {
+	films, err := film.GetFilms() // filmパッケージの関数を呼び出す
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(films)
+}
+
 func main() {
 	// ハンドラーを登録
 	http.HandleFunc("/", HelloHandler)
+	http.HandleFunc("/films", filmsHandler)
 
 	// サーバーのポート番号
 	port := "8080"
