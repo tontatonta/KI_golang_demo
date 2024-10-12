@@ -1,15 +1,27 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"log"
+	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello from Go backend!")
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello, World!")
 }
 
 func main() {
-    http.HandleFunc("/", handler)
-    http.ListenAndServe(":8080", nil)
+	// ハンドラーを登録
+	http.HandleFunc("/", HelloHandler)
+
+	// サーバーのポート番号
+	port := "8080"
+
+	// HTTPS URLを表示する
+	fmt.Printf("サーバーを以下のURLで起動中: http://localhost:%s\n", port)
+
+	// HTTPサーバーを起動
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal("サーバーの起動に失敗:", err)
+	}
 }

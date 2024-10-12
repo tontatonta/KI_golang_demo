@@ -1,17 +1,18 @@
-# 公式のGoイメージをベースにする
+# 使用するGoのバージョンを指定
 FROM golang:1.23.2
 
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# ソースコードをコピー
+# Goのモジュールをコピー
+COPY go.mod ./
+RUN go mod download
+
+# アプリのソースコードをコピー
 COPY . .
 
-# Goアプリケーションをビルド
+# アプリをビルド
 RUN go build -o main .
 
-# 8080番ポートを公開
-EXPOSE 8080
-
-# アプリを起動
+# アプリを実行
 CMD ["./main"]
