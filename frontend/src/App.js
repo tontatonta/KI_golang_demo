@@ -2,52 +2,77 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
-  const [film, setFilm] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [films, setFilms] = useState([]);
+  const [selectedFilm, setSelectedFilm] = useState(null);
+  const [filmDetails, setFilmDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // 映画リストを取得
   useEffect(() => {
-    // Goバックエンドからデータを取得
-    fetch('http://localhost:8000/film')
+    fetch('https://ghibliapi.vercel.app/films')
+      .then((response) => response.json())
+      .then((data) => setFilms(data))
+      .catch((error) => console.error('Error fetching film list:', error));
+  }, []);
+
+  // 選択された映画の情報を取得
+  const fetchFilmDetails = (filmID) => {
+    setLoading(true);
+    setError(null);
+    fetch(`http://localhost:8000/film?id=${filmID}`)
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error('Failed to fetch film details');
         }
         return response.json();
       })
       .then((data) => {
-        setFilm(data);
+        setFilmDetails(data);
         setLoading(false);
       })
       .catch((error) => {
         setError(error);
         setLoading(false);
       });
-  }, []);
+  };
 
-  if (loading) {
-    return <div className="App">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="App">Error: {error.message}</div>;
-  }
-
-  if (!film) {
-    return <div className="App">No film data available</div>;
-  }
+  const handleFilmChange = (event) => {
+    const filmID = event.target.value;
+    setSelectedFilm(filmID);
+    if (filmID) {
+      fetchFilmDetails(filmID);
+    } else {
+      setFilmDetails(null);
+    }
+  };
 
   return (
     <div className="App">
-      <h1 className="title">{film.title} ({film.original_title})</h1>
-      <div className="card">
-        <p><strong>Description:</strong> {film.description}</p>
-        <p><strong>Director:</strong> {film.director}</p>
-        <p><strong>Producer:</strong> {film.producer}</p>
-        <p><strong>Release Date:</strong> {film.release_date}</p>
-        <p><strong>Running Time:</strong> {film.running_time} minutes</p>
-        <p><strong>Rotten Tomatoes Score:</strong> {film.rt_score}</p>
-      </div>
+      <h1 className="title">Select a Ghibli Film</h1>
+      <select value={selectedFilm || ''} onChange={handleFilmChange}>
+        <option value="">Select a film</option>
+        {films.map((film) => (
+          <option key={film.id} value={film.id}>
+            {film.title}
+          </option>
+        ))}
+      </select>
+
+      {loading && <div>Loading film details...</div>}
+      {error && <div>Error: {error.message}</div>}
+
+      {filmDetails && (
+        <div className="card">
+          <h2>{filmDetails.title} ({filmDetails.original_title})</h2>
+          <p><strong>Description:</strong> {filmDetails.description}</p>
+          <p><strong>Director:</strong> {filmDetails.director}</p>
+          <p><strong>Producer:</strong> {filmDetails.producer}</p>
+          <p><strong>Release Date:</strong> {filmDetails.release_date}</p>
+          <p><strong>Running Time:</strong> {filmDetails.running_time} minutes</p>
+          <p><strong>Rotten Tomatoes Score:</strong> {filmDetails.rt_score}</p>
+        </div>
+      )}
     </div>
   );
 }

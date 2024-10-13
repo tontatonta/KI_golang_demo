@@ -17,7 +17,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func film(w http.ResponseWriter, r *http.Request) {
 	enableCors(&w)
-	filmID := "58611129-2dbc-4a81-a72f-77ddfc1b1b49"
+
+	// クエリパラメーターから映画IDを取得
+	filmID := r.URL.Query().Get("id")
+	if filmID == "" {
+		http.Error(w, "Film ID is required", http.StatusBadRequest)
+		return
+	}
+
 	film, err := handlers.GetFilm(filmID)
 	if err != nil {
 		http.Error(w, "Error fetching film", http.StatusInternalServerError)
